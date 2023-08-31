@@ -27,7 +27,7 @@ def load_monthly_data(file_path):
 
 # Load June data
 #june_file_path = 'Roundtable Data/June Roundtable data.xlsx - Round table.csv'
-df_june = pd.DataFrame(load_monthly_data(june_file_path))
+#df_june = pd.DataFrame(load_monthly_data(june_file_path))
 
 # Load July data
 july_file_path = 'Roundtable Data/Roundtable July 2023.csv'
@@ -38,7 +38,7 @@ df_month = pd.concat([df_july], ignore_index=True)
 
 # Load June vehicles data
 #june_vehicles_file_path = 'KM Data/Vehicles-Daily-Report-01-Jun-2023-12-00-AM-to-30-Jun-2023-11-59-PM.xlsx - Vehicle Daily Report.csv'
-df_vehicles_june = pd.DataFrame(load_monthly_data(june_vehicles_file_path))
+#df_vehicles_june = pd.DataFrame(load_monthly_data(june_vehicles_file_path))
 
 # Load July vehicles data
 july_vehicles_file_path = 'KM Data/Vehicles-Daily-Report-01-Jul-2023-12-00-AM-to-31-Jul-2023-11-59-PM.csv'
@@ -52,7 +52,7 @@ def load_rank_data(file_path):
 
 # Load June data
 #june_rank_file_path = 'Rank Data/June Rank Data.csv'
-df_rank_june = pd.DataFrame(load_rank_data(june_rank_file_path))
+#df_rank_june = pd.DataFrame(load_rank_data(june_rank_file_path))
 
 # Load July data
 july_rank_file_path = 'Rank Data/July Rank.csv'
