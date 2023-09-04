@@ -34,7 +34,7 @@ july_file_path = 'Roundtable Data/Roundtable july1.csv'
 df_july = pd.DataFrame(load_monthly_data(july_file_path))
 
 # Concatenate June and July data for df_month
-df_month = pd.concat([df_june,df_july], ignore_index=True)
+df_month = pd.concat([df_july], ignore_index=True)
 
 # Load June vehicles data
 june_vehicles_file_path = 'KM Data/Vehicles-Daily-Report-01-Jun-2023-12-00-AM-to-30-Jun-2023-11-59-PM.xlsx - Vehicle Daily Report.csv'
