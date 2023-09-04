@@ -27,7 +27,7 @@ def load_monthly_data(file_path):
 
 # Load June data
 #june_file_path = 'Roundtable Data/June Roundtable data.xlsx - Round table.csv'
-df_june = pd.DataFrame(load_monthly_data(june_file_path))
+#df_june = pd.DataFrame(load_monthly_data(june_file_path))
 
 # Load July data
 july_file_path = 'Roundtable Data/Roundtable july1.csv'
