@@ -26,15 +26,15 @@ def load_monthly_data(file_path):
     return pd.read_csv(file_path, encoding='latin1')
 
 # Load June data
-#june_file_path = 'Roundtable Data/June Roundtable data.xlsx - Round table.csv'
-#df_june = pd.DataFrame(load_monthly_data(june_file_path))
+june_file_path = 'Roundtable Data/June Roundtable data.xlsx - Round table.csv'
+df_june = pd.DataFrame(load_monthly_data(june_file_path))
 
 # Load July data
-july_file_path = 'Roundtable Data/Roundtable july1.csv'
+july_file_path = 'Roundtable Data/Roundtable july1 (2).csv'
 df_july = pd.DataFrame(load_monthly_data(july_file_path))
 
 # Concatenate June and July data for df_month
-df_month = pd.concat([df_july], ignore_index=True)
+df_month = pd.concat([df_june, df_july], ignore_index=True)
 
 # Load June vehicles data
 june_vehicles_file_path = 'KM Data/Vehicles-Daily-Report-01-Jun-2023-12-00-AM-to-30-Jun-2023-11-59-PM.xlsx - Vehicle Daily Report.csv'
@@ -47,15 +47,16 @@ df_vehicles_july = pd.DataFrame(load_monthly_data(july_vehicles_file_path))
 # Concatenate June and July data for df_vehicles_month
 df_vehicles_month = pd.concat([df_vehicles_june, df_vehicles_july], ignore_index=True)
 
+
 def load_rank_data(file_path):
     return pd.read_csv(file_path, encoding='latin1')
 
 # Load June data
-june_rank_file_path = 'Rank Data/June Rank Data.csv'
+june_rank_file_path = r"Rank Data/June Rank Data.csv"
 df_rank_june = pd.DataFrame(load_rank_data(june_rank_file_path))
 
 # Load July data
-july_rank_file_path = 'Rank Data/July Rank.csv'
+july_rank_file_path = r"Rank Data/July Rank.csv"
 df_rank_july = pd.DataFrame(load_rank_data(july_rank_file_path))
 
 # Concatenate June and July data for the rank DataFrame
@@ -102,7 +103,7 @@ df2['fromTime'] = pd.to_datetime(df2['fromTime'], format='%Y-%m-%dT%H:%M')
 df_month['updated'] = pd.to_datetime(
     df_month['updated'])
 df_month['fromTime'] = pd.to_datetime(
-    df_month['fromTime'])
+    df_month['fromTime'], format='mixed')
 df_month['Reach Time'] = pd.to_datetime(
     df_month['Reach Time'], format='mixed')
 
@@ -280,9 +281,21 @@ df_month = df_month.merge(
     df_vehicles_month[['Number', 'Name']], on='Number', how='left')
 
 
+
 df_month = df_month.rename(
-    columns={"Name": "EPOD Name", "Reach date": "Actual Date", "Full name": "Actual OPERATOR NAME", "Reach time": "E-pod Arrival Time @ Session location", "optBatteryBeforeChrg": "Actual SoC_Start", "optBatteryAfterChrg": "Actual Soc_End", "KWH Charged": "KWH Pumped Per Session", "Booked time": "Booking Session time"})
-df_month['EPOD Name'] = df_month['EPOD Name'].fillna('EPOD012')
+    columns={"Name": "EPOD Name", "Full name": "Actual OPERATOR NAME", "optBatteryBeforeChrg": "Actual SoC_Start", "optBatteryAfterChrg": "Actual Soc_End", "KWH Charged": "KWH Pumped Per Session", "Booked time": "Booking Session time"})
+#df_month['EPOD Name'] = df_month['EPOD Name'].fillna('EPOD012')
+
+# Concatenate "Reach Date" and "Reach date" columns into "Actual Date"
+df_month['Actual Date'] = df_month['Reach Date'].fillna(df_month['Reach date'])
+
+# Drop the individual "Reach Date" and "Reach date" columns
+df_month.drop(columns=['Reach Date', 'Reach date'], inplace=True)
+
+df_month['E-pod Arrival Time @ Session location'] = df_month['Reach time'].fillna(df_month['Arrival Time'])
+
+# Drop rows without a 'uid'
+df_month.dropna(subset=['uid'], inplace=True)
 
 grouped_df = merged_df.groupby("uid").agg(
     {"Actual SoC_Start": "min", "Actual Soc_End": "max"}).reset_index()
@@ -310,7 +323,7 @@ merged_df['Duration'] = (pd.to_datetime(merged_df['optChargeEndTime'], dayfirst=
 #merged_df = merged_df[(merged_df['Duration'] >= 0) & (merged_df['Duration'] <= 300)]
 
 
-df_month['Day'] = pd.to_datetime(df_month['Booked date']).dt.day_name()
+df_month['Day'] = pd.to_datetime(df_month['Booked date'], format='mixed').dt.day_name()
 
 merged_df['Day'] = pd.to_datetime(merged_df['Actual Date']).dt.day_name()
 
@@ -321,7 +334,7 @@ cities = ["Gurugram", "Delhi", "Noida"]
 merged_df["Actual SoC_Start"] = merged_df["Actual SoC_Start"].str.rstrip("%")
 merged_df["Actual Soc_End"] = merged_df["Actual Soc_End"].str.rstrip("%")
 
-
+#df_month.to_csv("samlldata.csv", index=False)
 requiredColumns = ['uid', 'Actual Date', 'Customer Name', 'EPOD Name', 'Actual OPERATOR NAME', 'Duration', 'optChargeStartTime', 'optChargeEndTime', 'Day',
                    'E-pod Arrival Time @ Session location', 'Actual SoC_Start', 'Actual Soc_End', 'Booking Session time', 'Customer Location City', 'canceled', 'cancelledPenalty', 't-15_kpi', 'type', 'KWH Pumped Per Session', 'location.lat', 'location.long']
 
@@ -333,7 +346,7 @@ dfs = [merged_df, df_month]
 merged_df = pd.concat(dfs, ignore_index=True)
 
 merged_df = merged_df[merged_df['Customer Location City'].isin(cities)]
-#merged_df.to_csv(r"C:\Users\DELL\Downloads\finalstream\finalstream\mdf29.csv")
+#merged_df.to_csv(r"C:\Users\DELL\Downloads\finalstream\finalstream\iopdf29.csv")
 
 df = merged_df
 
