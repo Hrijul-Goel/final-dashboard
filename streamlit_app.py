@@ -15,48 +15,55 @@ from folium import plugins
 
 
 df1 = pd.DataFrame(pd.read_csv(
-    'May Data/Ops_Session_Data.csv', encoding='latin1'))
+    r'May Data/Ops_Session_Data.csv', encoding='latin1'))
 df2 = pd.DataFrame(pd.read_csv(
-    'May Data/past_bookings_May23.csv', encoding='latin1'))
+    r'May Data/past_bookings_May23.csv', encoding='latin1'))
 
 df3 = pd.DataFrame(pd.read_csv(
-    'May Data/possible_subscribers_May23.csv', encoding='latin1'))
+    r'May Data/possible_subscribers_May23.csv', encoding='latin1'))
 
 def load_monthly_data(file_path):
     return pd.read_csv(file_path, encoding='latin1')
 
 # Load June data
-june_file_path = 'Roundtable Data/June Roundtable data.xlsx - Round table.csv'
+june_file_path = r"Roundtable Data/June Roundtable data.xlsx - Round table.csv"
 df_june = pd.DataFrame(load_monthly_data(june_file_path))
 
 # Load July data
-july_file_path = 'Roundtable Data/Roundtable july1 (2).csv'
+july_file_path = r"Roundtable Data/Roundtable july1 (2).csv"
 df_july = pd.DataFrame(load_monthly_data(july_file_path))
+# Drop rows without a 'uid'
+df_july.dropna(subset=['uid'], inplace=True)
 
-# Load Aug data
-aug_file_path = 'Roundtable Data/Roundtable Aug 2023.csv'
+#df_july.to_csv("julydata.csv", index=False)
+
+# Load August data
+aug_file_path = r"Roundtable Data/August Roundtable.csv"
 df_aug = pd.DataFrame(load_monthly_data(aug_file_path))
+# Drop rows without a 'uid'
+df_aug.dropna(subset=['uid'], inplace=True)
 
 
-# # Concatenate June,July and aug data for df_month
+# Concatenate June and July data for df_month
 df_month = pd.concat([df_june, df_july, df_aug], ignore_index=True)
 
+
 # Load June vehicles data
-june_vehicles_file_path = 'KM Data/Vehicles-Daily-Report-01-Jun-2023-12-00-AM-to-30-Jun-2023-11-59-PM.xlsx - Vehicle Daily Report.csv'
+june_vehicles_file_path = r"KM Data/Vehicles-Daily-Report-01-Jun-2023-12-00-AM-to-30-Jun-2023-11-59-PM.xlsx - Vehicle Daily Report.csv"
 df_vehicles_june = pd.DataFrame(load_monthly_data(june_vehicles_file_path))
 
 # Load July vehicles data
-july_vehicles_file_path = 'KM Data/Vehicles-Daily-Report-01-Jul-2023-12-00-AM-to-31-Jul-2023-11-59-PM.csv'
+july_vehicles_file_path = r"KM Data/Vehicles-Daily-Report-01-Jul-2023-12-00-AM-to-31-Jul-2023-11-59-PM.csv"
 df_vehicles_july = pd.DataFrame(load_monthly_data(july_vehicles_file_path))
 
-# Load Aug vehicles data
-aug_vehicles_file_path = 'KM Data/Vehicles-Daily-Report-01-Aug-2023-12-00-AM-to-31-Aug-2023-11-59-PM.csv'
+# Load August vehicles data
+aug_vehicles_file_path = r"KM Data/Vehicles-Daily-Report-01-Aug-2023-12-00-AM-to-31-Aug-2023-11-59-PM.csv"
 df_vehicles_aug = pd.DataFrame(load_monthly_data(aug_vehicles_file_path))
 
-
-# Concatenate June,July and aug data for df_vehicles_month
+# Concatenate June and July data for df_vehicles_month
 df_vehicles_month = pd.concat([df_vehicles_june, df_vehicles_july, df_vehicles_aug], ignore_index=True)
 
+#df_vehicles_month.to_csv("hjklo.csv", index=False)
 
 def load_rank_data(file_path):
     return pd.read_csv(file_path, encoding='latin1')
@@ -69,12 +76,11 @@ df_rank_june = pd.DataFrame(load_rank_data(june_rank_file_path))
 july_rank_file_path = r"Rank Data/July Rank.csv"
 df_rank_july = pd.DataFrame(load_rank_data(july_rank_file_path))
 
-# Load aug data
-aug_rank_file_path = r"Rank Data/July Rank.csv"
+# Load August data
+aug_rank_file_path = r"Rank Data/August Rank.csv"
 df_rank_aug = pd.DataFrame(load_rank_data(aug_rank_file_path))
 
-
-# Concatenate June,July and aug data for the rank DataFrame
+# Concatenate June and July data for the rank DataFrame
 df_rank = pd.concat([df_rank_june, df_rank_july, df_rank_aug], ignore_index=True)
 
 df_month.rename(
@@ -295,22 +301,30 @@ df_month['Number'] = df_month['Number'].astype(str)
 df_month = df_month.merge(
     df_vehicles_month[['Number', 'Name']], on='Number', how='left')
 
-
+# Drop rows without a 'uid'
+df_month.dropna(subset=['uid'], inplace=True)
 
 df_month = df_month.rename(
     columns={"Name": "EPOD Name", "Full name": "Actual OPERATOR NAME", "optBatteryBeforeChrg": "Actual SoC_Start", "optBatteryAfterChrg": "Actual Soc_End", "KWH Charged": "KWH Pumped Per Session", "Booked time": "Booking Session time"})
 #df_month['EPOD Name'] = df_month['EPOD Name'].fillna('EPOD012')
 
 # Concatenate "Reach Date" and "Reach date" columns into "Actual Date"
-df_month['Actual Date'] = df_month['Reach Date'].fillna(df_month['Reach date'])
+df_month['Actual Date'] = df_month['Reach Date'].fillna('') + df_month['Reach date'].fillna('') + df_month['Aug Reach Date'].fillna('')
 
 # Drop the individual "Reach Date" and "Reach date" columns
-df_month.drop(columns=['Reach Date', 'Reach date'], inplace=True)
+df_month.drop(columns=['Reach Date', 'Reach date', 'Aug Reach Date'], inplace=True)
 
-df_month['E-pod Arrival Time @ Session location'] = df_month['Reach time'].fillna(df_month['Arrival Time'])
+df_month['E-pod Arrival Time @ Session location'] = df_month['Reach Time'].fillna('').astype(str) + df_month['Arrival Time'].fillna('').astype(str) + df_month['Aug Reach Time'].fillna('').astype(str)
+
 
 # Drop rows without a 'uid'
 df_month.dropna(subset=['uid'], inplace=True)
+
+df_month = df_month.drop_duplicates(subset="uid", keep="first")
+
+df_month = df_month.reset_index(drop=True)
+
+
 
 grouped_df = merged_df.groupby("uid").agg(
     {"Actual SoC_Start": "min", "Actual Soc_End": "max"}).reset_index()
@@ -361,6 +375,7 @@ dfs = [merged_df, df_month]
 merged_df = pd.concat(dfs, ignore_index=True)
 
 merged_df = merged_df[merged_df['Customer Location City'].isin(cities)]
+merged_df.dropna(subset=['uid'], inplace=True)
 #merged_df.to_csv(r"C:\Users\DELL\Downloads\finalstream\finalstream\iopdf29.csv")
 
 df = merged_df
